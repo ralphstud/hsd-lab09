@@ -136,8 +136,8 @@ void FPGA::largeMM(const float* weight_mat, const float* input_mat, float* outpu
           m1[l] = 0;
         for(int r = 0; r < block_row; ++r)
         { 
-				  for(int c = 0; c < block_col_2; ++c)
-            m1[r * v_size_ + c] = input_mat[(j + c) * num_matrix2 + k + r];
+				  for(int c = 0; c < block_col_1; ++c)
+            m1[r * v_size_ + c] = weight_mat[(i + r) * num_input + j + c];
         }
 
         // 2) Assign a m2
@@ -145,8 +145,8 @@ void FPGA::largeMM(const float* weight_mat, const float* input_mat, float* outpu
           m2[l] = 0;
         for(int r = 0; r < block_row; ++r)
         { 
-				  for(int c = 0; c < block_col_1; ++c)
-            m2[r * v_size_ + c] = weight_mat[(i + c) * num_input + j + r];
+				  for(int c = 0; c < block_col_2; ++c)
+            m2[r * v_size_ + c] = input_mat[(j + r) * num_matrix2 + k + c];
         }
         
         // 3) Call a function `blockMM() to execute Matrix matrix multiplication
@@ -233,5 +233,31 @@ void FPGA::convLowering(const std::vector<std::vector<std::vector<std::vector<fl
   // For example,
   // new_weights[0][0] = cnn_weights[0][0][0][0];
   // new_inputs[0][0] = inputs[0][0][0];
+  for(int i = 0; i < conv_channel; ++i) 
+  {
+    for(int j = 0; j < input_channel; ++j)
+    {
+      for(int k = 0; k < conv_height; ++k)
+      {
+        for(int l = 0; l < conv_width; ++l)
+          new_weights[i][j * conv_height * conv_width + k * conv_width + l] = cnn_weights[i][j][k][l];
+      }
+    }
+  }
+
+  for(int i = 0; i < input_channel; ++i) 
+  {
+    for(int j = 0; j < input_height - conv_height + 1; ++j)
+    {
+      for(int k = 0; k < input_width - conv_width + 1; ++k)
+      {
+        for(int l = 0; l < conv_height; ++l)
+        {
+          for(int m = 0; m < conv_width; ++m)
+            new_inputs[(i + 1) * conv_height * conv_width - l * conv_width - m - 1][j * (input_width - conv_width + 1) + k] = inputs[i][j + l][k + m];
+        }        
+      }
+    }
+  }
 
 }
