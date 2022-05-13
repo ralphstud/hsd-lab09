@@ -137,7 +137,7 @@ void FPGA::largeMM(const float* weight_mat, const float* input_mat, float* outpu
         for(int r = 0; r < block_row; ++r)
         { 
 				  for(int c = 0; c < block_col_2; ++c)
-            m1[r * v_size_ + c] = input_mat[(j + r) * num_matrix2 + k * v_size_ + c];
+            m1[r * v_size_ + c] = input_mat[(j + r) * num_matrix2 + k + c];
         }
 
         // 2) Assign a m2
@@ -146,7 +146,7 @@ void FPGA::largeMM(const float* weight_mat, const float* input_mat, float* outpu
         for(int r = 0; r < block_row; ++r)
         { 
 				  for(int c = 0; c < block_col_1; ++c)
-            m2[r * v_size_ + c] = weight_mat[(i + r) * num_input + j * v_size_ + c];
+            m2[r * v_size_ + c] = weight_mat[(i + r) * num_input + j + c];
         }
         
         // 3) Call a function `blockMM() to execute Matrix matrix multiplication
@@ -183,17 +183,17 @@ void FPGA::largeMV(const float* large_mat, const float* input, float* output, in
       int block_col = min(v_size_, num_input-j);
 
       // 1) Assign a vector
-      for(int k = 0; k < v_size_; ++k)
-        vec[k] = 0;
-      for(int k = 0; k < block_row; ++k)
+			for(int k = 0; k < v_size_; ++k)
+			  vec[k] = 0;
+			for(int k = 0; k < block_col; ++k)
 				vec[k] = input[j + k];
-
+     
       // 2) Assign a matrix
-      for(int l = 0; l < m_size_; ++l)
+      for(int l = 0; l < v_size_ * m_size_; ++l)
+			  mat[l] = 0;
+			for(int l = 0; l < block_row; ++l)
 			{
-				for(int m = 0; m < v_size_; ++m)
-          mat[l * v_size_ + m] = 0;
-        for(int m = 0; m < block_col; ++m)
+				for(int m = 0; m < block_col; ++m)
 					mat[l * v_size_ + m] = large_mat[(i + l) * num_input + j + m];
 			}
 
