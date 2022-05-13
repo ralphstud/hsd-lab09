@@ -223,5 +223,31 @@ void FPGA::convLowering(const std::vector<std::vector<std::vector<std::vector<fl
   // For example,
   // new_weights[0][0] = cnn_weights[0][0][0][0];
   // new_inputs[0][0] = inputs[0][0][0];
+  for(int i = 0; i < conv_channel; ++i) 
+  {
+    for(int j = 0; j < input_channel; ++j)
+    {
+      for(int k = 0; k < conv_height; ++k)
+      {
+        for(int l = 0; l < conv_width; ++l)
+          new_weights[i][j * conv_height * conv_width + k * conv_width + l] = cnn_weights[i][j][k][l];
+      }
+    }
+  }
+
+  for(int i = 0; i < input_channel; ++i) 
+  {
+    for(int j = 0; j < input_height - conv_height + 1; ++j)
+    {
+      for(int k = 0; k < input_width - conv_width + 1; ++k)
+      {
+        for(int l = 0; l < conv_height; ++l)
+        {
+          for(int m = 0; m < conv_width; ++m)
+            new_inputs[(i + 1) * conv_height * conv_width - l * conv_width - m - 1][j * (input_width - conv_width + 1) + k] = inputs[i][j + l][k + m];
+        }        
+      }
+    }
+  }
   
 }
