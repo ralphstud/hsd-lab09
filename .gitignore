@@ -1,0 +1,10 @@
+data/t10k-images.idx3-ubyte
+data/t10k-labels.idx1-ubyte
+build/caffe.pb.o
+build/digit_dnn.o
+build/fpga_api.o
+build/libpylib.so
+build/py_lib.o	
+proto/caffe.pb.cc
+proto/caffe.pb.h
+.cache
